@@ -21,6 +21,12 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    - name: Install SQLC
+      run: |
+        cd
+        go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+        cd -
+
     - name: Build
       run: go build -v ./...
 
