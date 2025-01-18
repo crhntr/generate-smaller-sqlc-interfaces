@@ -37,3 +37,6 @@ type UpserUpdater interface {
 }
 
 ```
+
+Run it after `sqlc generate` and make sure you are generating Querier.
+Pass as arguments the names (or globs) of sql files.
