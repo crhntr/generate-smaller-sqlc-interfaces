@@ -14,7 +14,7 @@ This tool helps by findinga a new comment in your sql files and copying from you
 SELECT * FROM users WHERE id = $1;
 
 -- name GetTaskByID :on
--- interface: Selectorse
+-- interface: Selectors
 SELECT * FROM tasks WHERE id = $1;
 
 -- name SetUserName :exec
