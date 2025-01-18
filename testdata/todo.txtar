@@ -1,0 +1,90 @@
+-- queries.sql --
+-- name: Lists :many
+-- interface: Selector
+SELECT * FROM list;
+
+-- name: TasksByListID :many
+-- interface: Selector
+SELECT task.*, plan.instructions FROM task JOIN plan ON plan.id = plan_id WHERE list_id = sqlc.arg(id) ORDER BY priority DESC;
+
+-- name: ListByID :one
+-- interface: Selector TaskPrioritySetter
+SELECT * FROM list WHERE id = sqlc.arg(id);
+
+-- name: SetTaskPriority :exec
+-- interface: TaskPrioritySetter
+UPDATE task SET priority = sqlc.arg(priority) WHERE id = sqlc.arg(id);
+
+-- go.mod --
+module playground
+
+go 1.23
+
+require github.com/jackc/pgx/v5 v5.7.2
+
+require (
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
+)
+-- sqlc.yaml --
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "queries.sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "playground"
+        out: "."
+        sql_package: "pgx/v5"
+        emit_interface: true
+-- schema.sql --
+DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS plan;
+DROP TABLE IF EXISTS list;
+
+CREATE TABLE list (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE plan (
+    id SERIAL PRIMARY KEY,
+    instructions TEXT NOT NULL
+);
+
+CREATE TABLE task (
+  id SERIAL PRIMARY KEY,
+  list_id SERIAL NOT NULL REFERENCES list(id),
+  plan_id INTEGER NOT NULL REFERENCES plan(id),
+  priority INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT unique_list_priority UNIQUE (list_id, priority) DEFERRABLE INITIALLY IMMEDIATE
+);
+
+
+-- interface_test.go --
+package playground
+
+var _ Selector = Querier((*Queries)(nil))
+var _ TaskPrioritySetter  = Querier((*Queries)(nil))
+
+-- go.sum --
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
+github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
+github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=
+github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
+github.com/jackc/pgx/v5 v5.7.2 h1:mLoDLV6sonKlvjIEsV56SkWNCnuNv531l94GaIzO+XI=
+github.com/jackc/pgx/v5 v5.7.2/go.mod h1:ncY89UGWxg82EykZUwSpUKEfccBGGYq1xjrOpsbsfGQ=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+golang.org/x/crypto v0.32.0 h1:euUpcYgM8WcP71gNpTqQCn6rC2t6ULUPiOzfWaXVVfc=
+golang.org/x/crypto v0.32.0/go.mod h1:ZnnJkOaASj8g0AjIduWNlq2NRxL0PlBrbKVyZ6V/Ugc=
+golang.org/x/text v0.21.0 h1:zyQAAkrwaneQ066sspRyJaG9VNi/YJ1NfzcGB3hZ/qo=
+golang.org/x/text v0.21.0/go.mod h1:4IBbMaMmOPCJ8SecivzSH54+73PCFmPWxNTLm+vZkEQ=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
