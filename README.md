@@ -10,7 +10,7 @@ This tool helps by findinga a new comment in your sql files and copying from you
 ```sql
 
 -- name GetUserByID :one
--- interface: Selectors UpserUpdater
+-- interface: Selectors UserUpdater
 SELECT * FROM users WHERE id = $1;
 
 -- name GetTaskByID :on
@@ -18,7 +18,7 @@ SELECT * FROM users WHERE id = $1;
 SELECT * FROM tasks WHERE id = $1;
 
 -- name SetUserName :exec
--- interface: Selectors, UpserUpdater
+-- interface: Selectors, UserUpdater
 UPDATE users SET name = $1 WHERE id = $2;
 
 ```
@@ -31,7 +31,7 @@ type Selectors interface {
   GetUserByID(ctx context.Context, id int) (User, error)
 }
 
-type UpserUpdater interface {
+type UserUpdater interface {
   GetUserByID(ctx context.Context, id int) (User, error)
   SetUserName(ctx context.Context, name string, id int) error
 }
