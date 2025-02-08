@@ -14,16 +14,6 @@ import (
 func Test(t *testing.T) {
 	ctx := context.TODO() // replace with t.Context
 
-	build := t.TempDir()
-	bin := filepath.Join(build, "build")
-	buildCommand := exec.CommandContext(ctx, "go", "build", "-o", bin)
-	buildCommand.Dir = "."
-	buildCommand.Stderr = os.Stderr
-	buildCommand.Stdout = os.Stdout
-	if err := buildCommand.Run(); err != nil {
-		t.Fatal(err)
-	}
-
 	archive, err := txtar.ParseFile("./testdata/todo.txtar")
 	if err != nil {
 		t.Fatal(err)
@@ -49,14 +39,7 @@ func Test(t *testing.T) {
 	if err := generate(ctx, d, "playground", filepath.Join(d, "queries.sql")); err != nil {
 		log.Fatal(err)
 	}
-	//txer := exec.CommandContext(ctx, bin, "queries.sql")
-	//txer.Dir = d
-	//txer.Stderr = os.Stderr
-	//txer.Stdout = os.Stdout
-	//if err := txer.Run(); err != nil {
-	//	t.Fatal(err)
-	//}
-	
+
 	goTest := exec.CommandContext(ctx, "go", "test")
 	goTest.Dir = d
 	goTest.Stderr = os.Stderr
