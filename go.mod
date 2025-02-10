@@ -1,4 +1,4 @@
-module github.com/crhntr/generate-smaller-sqlc-interfaces
+module github.com/crhntr/querier-interface
 
 go 1.23
 

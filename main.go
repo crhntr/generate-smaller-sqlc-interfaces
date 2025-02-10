@@ -13,7 +13,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/crhntr/generate-smaller-sqlc-interfaces/interfaces"
+	"github.com/crhntr/querier-interface/interfaces"
 )
 
 func main() {
